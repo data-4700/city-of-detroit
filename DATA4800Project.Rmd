@@ -1,0 +1,105 @@
+```{r}
+#library(readr)
+#data = read_csv("final_cleaned_detroit.csv")
+data = final_cleaned_detroit
+```
+```{r}
+data
+```
+```{r}
+library(ggplot2)
+ggplot(data) +
+  geom_bar(aes(x = vacant))
+```
+
+```{r}
+ggplot(data)+
+  geom_point(aes(x = `Assessed Value`, y = `Previous Assessed Value`, col = factor(vacant)))+
+  labs(col = "vacant")+
+  xlim(0,10000)+
+  ylim(0,10000)+
+  scale_color_manual(values = c("lightgreen", "blue"))
+```
+```{r}
+ggplot(data)+
+  geom_bar(aes(x = `Binary Tax Status`, fill = factor(vacant)))+
+  scale_fill_manual(values = c("lightgreen", "blue"))+
+  labs(fill = "vacant")
+```
+
+```{r}
+data2 <- data[c("Total Floor Area", 
+                "Total Acreage", 
+                "Frontage", 
+                "Depth", 
+                "Building Count", 
+                "Year Built", 
+                "Sale Price", 
+                "Assessed Value", 
+                "Previous Assessed Value",
+                "Taxable Value", 
+                "Previous Taxable Value", 
+                "fine_amount", 
+                "yearly_average", 
+                "vacant", 
+                #"Binary Tax Status", 
+                "Binary Building Permit Status", 
+                "Sale Date Year", 
+                "Taxpayer City is Detroit",
+                "neighborhood_population",
+                "normcrime",
+                "num_vacant_neighborhood"
+                )]
+data2[is.na(data2)] <- 0
+data2
+```
+```{r}
+set.seed(34)
+trainsample = sample(1:211865, size = 150000)
+train = data2[trainsample,]
+test = data2[-trainsample,]
+train_model = glm(vacant~., data = train, family = binomial)
+summary(train_model)
+```
+```{r}
+test.predict <- predict(train_model, newdata = test, type = "response")
+#test.predict
+table = table(test$vacant, test.predict > 0.33)
+table
+```
+```{r}
+# overall accuracy
+(58030+68)/(211865-150000)
+# predicted inhabited
+(58030+3706)/(211865-150000)
+# proportion inhabited
+(58030+61)/(211865-150000)
+# accuracy among vacant houses
+68/(3706 + 68)
+# accuracy among inhabited houses
+58030/(58030+61)
+# predicted vacant
+(68+61)/(211865-150000)
+```
+```{r}
+(0.5)^211865
+```
+
+```{r}
+table(data$vacant)
+12805/(199060+12805)
+```
+```{r}
+table(data$`Building Count`)
+```
+
+```{r}
+cor(x = data2$vacant, y = data2$`Binary Tax Status`)
+```
+```{r}
+cor(data$`Previous Assessed Value`, data$`Assessed Value`)
+```
+```{r}
+(2902+86)/(49000+2902+51+86)
+```
+
